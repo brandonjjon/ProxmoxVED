@@ -1,0 +1,56 @@
+{
+  "name": "Pangolin",
+  "slug": "pangolin",
+  "categories": [
+    21
+  ],
+  "date_created": "2025-10-26",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "config_path": "/opt/pangolin/config/config.yml",
+  "interface_port": 443,
+  "documentation": "https://docs.pangolin.net/",
+  "website": "https://github.com/fosrl/pangolin",
+  "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/pangolin.svg",
+  "description": "Pangolin is a self-hosted reverse proxy with tunneled connectivity, identity-aware access control, and a unified dashboard for managing applications across isolated networks.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/pangolin.sh",
+      "resources": {
+        "cpu": 2,
+        "ram": 4096,
+        "hdd": 8,
+        "os": "Debian",
+        "version": "12"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "Requires a domain name pointing to your server's IP address",
+      "type": "warning"
+    },
+    {
+      "text": "Firewall ports required: 80 (TCP), 443 (TCP), 51820 (UDP), 21820 (UDP)",
+      "type": "info"
+    },
+    {
+      "text": "Access the initial setup at https://YOUR_DOMAIN/auth/initial-setup",
+      "type": "info"
+    },
+    {
+      "text": "Admin credentials will be set during initial setup",
+      "type": "info"
+    },
+    {
+      "text": "Configuration details saved to ~/pangolin.creds",
+      "type": "info"
+    }
+  ]
+}
