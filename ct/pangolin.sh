@@ -21,29 +21,52 @@ variables
 color
 catch_errors
 
-# Collect Pangolin configuration before container creation
-echo -e "\n${INFO} Pangolin Configuration${CL}"
-echo -e "${YW}Pangolin requires a domain name for proper operation.${CL}"
-echo -e "${YW}You can use a domain or IP address for testing.${CL}\n"
+# Collect Pangolin configuration before container creation using whiptail
+msg_info "Pangolin Configuration"
 
-read -r -p "Enter your base domain (e.g., example.com or 10.10.0.180): " PANGOLIN_BASE_DOMAIN
-PANGOLIN_BASE_DOMAIN="${PANGOLIN_BASE_DOMAIN:-localhost}"
+PANGOLIN_BASE_DOMAIN=$(whiptail --inputbox \
+  "Enter your base domain name or IP address.\n\nExamples:\n  - example.com\n  - 10.10.0.180\n  - pangolin.mydomain.com" \
+  12 70 \
+  --title "Base Domain" 3>&1 1>&2 2>&3)
 
-read -r -p "Enter your dashboard domain (default: ${PANGOLIN_BASE_DOMAIN}): " PANGOLIN_DASHBOARD_DOMAIN
+if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
+  msg_error "Base domain is required. Exiting."
+  exit 1
+fi
+
+PANGOLIN_DASHBOARD_DOMAIN=$(whiptail --inputbox \
+  "Enter your dashboard domain name or IP address.\n\nThis is where you'll access the Pangolin web interface.\n\nPress Enter to use: ${PANGOLIN_BASE_DOMAIN}" \
+  12 70 \
+  "${PANGOLIN_BASE_DOMAIN}" \
+  --title "Dashboard Domain" 3>&1 1>&2 2>&3)
+
 PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-$PANGOLIN_BASE_DOMAIN}"
 
-read -r -p "Enter your email for Let's Encrypt (or press Enter to skip): " PANGOLIN_EMAIL
+PANGOLIN_EMAIL=$(whiptail --inputbox \
+  "Enter your email address for Let's Encrypt SSL certificates.\n\nIf using an IP address, you can use a placeholder email.\n\nPress Enter to use: admin@${PANGOLIN_BASE_DOMAIN}" \
+  12 70 \
+  "admin@${PANGOLIN_BASE_DOMAIN}" \
+  --title "Let's Encrypt Email" 3>&1 1>&2 2>&3)
+
 PANGOLIN_EMAIL="${PANGOLIN_EMAIL:-admin@${PANGOLIN_BASE_DOMAIN}}"
+
+# Show configuration summary
+whiptail --title "Configuration Summary" --msgbox \
+"Pangolin will be configured with:
+
+Base Domain: ${PANGOLIN_BASE_DOMAIN}
+Dashboard Domain: ${PANGOLIN_DASHBOARD_DOMAIN}
+Email: ${PANGOLIN_EMAIL}
+
+Press OK to continue with installation." \
+14 70
 
 # Export variables to pass to install script
 export PANGOLIN_BASE_DOMAIN
 export PANGOLIN_DASHBOARD_DOMAIN
 export PANGOLIN_EMAIL
 
-echo -e "\n${INFO} Configuration Summary:${CL}"
-echo -e "  Base Domain: ${PANGOLIN_BASE_DOMAIN}"
-echo -e "  Dashboard Domain: ${PANGOLIN_DASHBOARD_DOMAIN}"
-echo -e "  Email: ${PANGOLIN_EMAIL}\n"
+msg_ok "Configuration Collected"
 
 function update_script() {
   header_info
