@@ -47,7 +47,7 @@ function update_script() {
 
 start
 
-# Collect Pangolin configuration using whiptail (like freepbx.sh does)
+# Collect Pangolin configuration using whiptail
 PANGOLIN_BASE_DOMAIN=$(whiptail --title "Base Domain" --inputbox "Enter your root domain without subdomains.\n\nExample: example.com" 10 70 3>&1 1>&2 2>&3)
 exitstatus=$?
 if [ $exitstatus != 0 ] || [ -z "$PANGOLIN_BASE_DOMAIN" ]; then
