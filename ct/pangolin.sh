@@ -21,6 +21,32 @@ variables
 color
 catch_errors
 
+function update_script() {
+  header_info
+  check_container_storage
+  check_container_resources
+
+  if [[ ! -f /opt/pangolin/docker-compose.yml ]]; then
+    msg_error "No ${APP} Installation Found!"
+    exit
+  fi
+
+  msg_info "Updating ${APP}"
+  cd /opt/pangolin || exit
+  $STD docker compose pull
+  $STD docker compose up -d
+  msg_ok "Updated ${APP}"
+
+  msg_info "Cleaning Up"
+  $STD docker image prune -af
+  msg_ok "Cleaned"
+
+  msg_ok "Update Successful"
+  exit
+}
+
+start
+
 # Collect Pangolin configuration before container creation using whiptail
 msg_info "Pangolin Configuration"
 
@@ -70,31 +96,6 @@ export PANGOLIN_EMAIL
 
 msg_ok "Configuration Collected"
 
-function update_script() {
-  header_info
-  check_container_storage
-  check_container_resources
-
-  if [[ ! -f /opt/pangolin/docker-compose.yml ]]; then
-    msg_error "No ${APP} Installation Found!"
-    exit
-  fi
-
-  msg_info "Updating ${APP}"
-  cd /opt/pangolin || exit
-  $STD docker compose pull
-  $STD docker compose up -d
-  msg_ok "Updated ${APP}"
-
-  msg_info "Cleaning Up"
-  $STD docker image prune -af
-  msg_ok "Cleaned"
-
-  msg_ok "Update Successful"
-  exit
-}
-
-start
 build_container
 description
 
