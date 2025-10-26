@@ -25,8 +25,8 @@ catch_errors
 msg_info "Pangolin Configuration"
 
 PANGOLIN_BASE_DOMAIN=$(whiptail --inputbox \
-  "Enter your base domain name or IP address.\n\nExamples:\n  - example.com\n  - 10.10.0.180\n  - pangolin.mydomain.com" \
-  12 70 \
+  "Enter your root domain without subdomains.\n\nExample: example.com" \
+  10 70 \
   --title "Base Domain" 3>&1 1>&2 2>&3)
 
 if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
@@ -35,20 +35,22 @@ if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
 fi
 
 PANGOLIN_DASHBOARD_DOMAIN=$(whiptail --inputbox \
-  "Enter your dashboard domain name or IP address.\n\nThis is where you'll access the Pangolin web interface.\n\nPress Enter to use: ${PANGOLIN_BASE_DOMAIN}" \
+  "Enter your dashboard domain.\n\nThis is where you'll access the Pangolin web interface.\n\nPress Enter to use: pangolin.${PANGOLIN_BASE_DOMAIN}" \
   12 70 \
-  "${PANGOLIN_BASE_DOMAIN}" \
+  "pangolin.${PANGOLIN_BASE_DOMAIN}" \
   --title "Dashboard Domain" 3>&1 1>&2 2>&3)
 
-PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-$PANGOLIN_BASE_DOMAIN}"
+PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-pangolin.${PANGOLIN_BASE_DOMAIN}}"
 
 PANGOLIN_EMAIL=$(whiptail --inputbox \
-  "Enter your email address for Let's Encrypt SSL certificates.\n\nIf using an IP address, you can use a placeholder email.\n\nPress Enter to use: admin@${PANGOLIN_BASE_DOMAIN}" \
-  12 70 \
-  "admin@${PANGOLIN_BASE_DOMAIN}" \
+  "Enter your email address for Let's Encrypt SSL certificates and admin login." \
+  10 70 \
   --title "Let's Encrypt Email" 3>&1 1>&2 2>&3)
 
-PANGOLIN_EMAIL="${PANGOLIN_EMAIL:-admin@${PANGOLIN_BASE_DOMAIN}}"
+if [[ -z "$PANGOLIN_EMAIL" ]]; then
+  msg_error "Email is required. Exiting."
+  exit 1
+fi
 
 # Show configuration summary
 whiptail --title "Configuration Summary" --msgbox \
