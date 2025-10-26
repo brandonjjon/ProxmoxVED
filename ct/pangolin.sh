@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main/misc/build.func)
+REPO_URL="${REPO_URL:-https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main}"
+# shellcheck disable=SC1090
+source <(curl -fsSL "${REPO_URL}/misc/build.func")
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: brandonjjon
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/fosrl/pangolin
 
 APP="Pangolin"
-var_tags="reverse-proxy;networking"
-var_cpu="2"
-var_ram="4096"
-var_disk="8"
-var_os="debian"
-var_version="12"
-var_unprivileged="1"
+var_tags="${var_tags:-reverse-proxy;networking}"
+var_cpu="${var_cpu:-2}"
+var_ram="${var_ram:-4096}"
+var_disk="${var_disk:-8}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-12}"
+var_unprivileged="${var_unprivileged:-1}"
 
 header_info "$APP"
 variables
@@ -30,7 +32,7 @@ function update_script() {
   fi
 
   msg_info "Updating ${APP}"
-  cd /opt/pangolin
+  cd /opt/pangolin || exit
   $STD docker compose pull
   $STD docker compose up -d
   msg_ok "Updated ${APP}"

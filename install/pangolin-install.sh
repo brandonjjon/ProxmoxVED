@@ -5,6 +5,7 @@
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/fosrl/pangolin
 
+# shellcheck source=/dev/null
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
@@ -31,8 +32,8 @@ msg_ok "Installed Docker"
 
 msg_info "Setting up ${APP}"
 INSTALL_DIR="/opt/pangolin"
-mkdir -p $INSTALL_DIR/{config/traefik,config/db,config/letsencrypt,config/logs}
-cd $INSTALL_DIR
+mkdir -p "$INSTALL_DIR"/{config/traefik,config/db,config/letsencrypt,config/logs}
+cd "$INSTALL_DIR" || exit
 
 BASE_DOMAIN=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter your base domain (e.g., example.com)" 8 78 --title "Base Domain" 3>&1 1>&2 2>&3)
 exitstatus=$?
