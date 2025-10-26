@@ -32,10 +32,25 @@
     "password": null
   },
   "notes": [
-    "Access the initial setup at https://YOUR_DOMAIN/auth/initial-setup",
-    "Requires a domain name pointing to your server's IP address",
-    "Firewall ports required: 80 (TCP), 443 (TCP), 51820 (UDP), 21820 (UDP)",
-    "Admin credentials will be set during initial setup",
-    "Configuration details saved to ~/pangolin.creds"
+    {
+      "text": "Requires a domain name pointing to your server's IP address",
+      "type": "warning"
+    },
+    {
+      "text": "Firewall ports required: 80 (TCP), 443 (TCP), 51820 (UDP), 21820 (UDP)",
+      "type": "info"
+    },
+    {
+      "text": "Access the initial setup at https://YOUR_DOMAIN/auth/initial-setup",
+      "type": "info"
+    },
+    {
+      "text": "Admin credentials will be set during initial setup",
+      "type": "info"
+    },
+    {
+      "text": "Configuration details saved to ~/pangolin.creds",
+      "type": "info"
+    }
   ]
 }
