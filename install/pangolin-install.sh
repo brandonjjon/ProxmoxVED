@@ -34,27 +34,40 @@ INSTALL_DIR="/opt/pangolin"
 mkdir -p "$INSTALL_DIR"/{config/traefik,config/db,config/letsencrypt,config/logs}
 cd "$INSTALL_DIR" || exit
 
-# Use placeholder values - user must configure via web UI or edit config.yml
-BASE_DOMAIN="localhost"
-DASHBOARD_DOMAIN="localhost"
-LETSENCRYPT_EMAIL="admin@localhost"
+# Use environment variables from ct script, fallback to localhost
+BASE_DOMAIN="${PANGOLIN_BASE_DOMAIN:-localhost}"
+DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-localhost}"
+LETSENCRYPT_EMAIL="${PANGOLIN_EMAIL:-admin@localhost}"
 SERVER_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9@#%^&*()-_=+[]{}|;:,.<>?' | head -c48)
 
 {
   echo "Pangolin Installation Complete"
   echo ""
-  echo "IMPORTANT: You must configure Pangolin before first use!"
+  echo "Configuration:"
+  echo "  Base Domain: ${BASE_DOMAIN}"
+  echo "  Dashboard Domain: ${DASHBOARD_DOMAIN}"
+  echo "  Email: ${LETSENCRYPT_EMAIL}"
+  echo "  Server Secret: ${SERVER_SECRET}"
   echo ""
-  echo "Configuration file: /opt/pangolin/config/config.yml"
-  echo "Edit the config file and update:"
-  echo "  - app.dashboard_url (your actual domain)"
-  echo "  - domains.domain1.base_domain (your actual domain)"
-  echo "  - email settings (if using SMTP)"
-  echo ""
-  echo "After editing config, restart services:"
-  echo "  cd /opt/pangolin && docker compose restart"
-  echo ""
-  echo "Server Secret (save this): ${SERVER_SECRET}"
+
+  if [[ "${BASE_DOMAIN}" == "localhost" ]]; then
+    echo "IMPORTANT: You configured 'localhost' as the domain."
+    echo "You must edit the configuration file to use your actual domain or IP:"
+    echo ""
+    echo "Configuration file: /opt/pangolin/config/config.yml"
+    echo "Edit the config file and update:"
+    echo "  - app.dashboard_url (your actual domain or IP)"
+    echo "  - domains.domain1.base_domain (your actual domain or IP)"
+    echo ""
+    echo "After editing config, restart services:"
+    echo "  cd /opt/pangolin && docker compose restart"
+  else
+    echo "Access Pangolin initial setup at:"
+    echo "  https://${DASHBOARD_DOMAIN}/auth/initial-setup"
+    echo ""
+    echo "If using an IP address, you may need to accept the"
+    echo "self-signed certificate in your browser."
+  fi
 } >>~/pangolin.creds
 msg_ok "Setup Pangolin"
 

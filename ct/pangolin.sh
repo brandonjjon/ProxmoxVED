@@ -21,6 +21,30 @@ variables
 color
 catch_errors
 
+# Collect Pangolin configuration before container creation
+echo -e "\n${INFO} Pangolin Configuration${CL}"
+echo -e "${YW}Pangolin requires a domain name for proper operation.${CL}"
+echo -e "${YW}You can use a domain or IP address for testing.${CL}\n"
+
+read -r -p "Enter your base domain (e.g., example.com or 10.10.0.180): " PANGOLIN_BASE_DOMAIN
+PANGOLIN_BASE_DOMAIN="${PANGOLIN_BASE_DOMAIN:-localhost}"
+
+read -r -p "Enter your dashboard domain (default: ${PANGOLIN_BASE_DOMAIN}): " PANGOLIN_DASHBOARD_DOMAIN
+PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-$PANGOLIN_BASE_DOMAIN}"
+
+read -r -p "Enter your email for Let's Encrypt (or press Enter to skip): " PANGOLIN_EMAIL
+PANGOLIN_EMAIL="${PANGOLIN_EMAIL:-admin@${PANGOLIN_BASE_DOMAIN}}"
+
+# Export variables to pass to install script
+export PANGOLIN_BASE_DOMAIN
+export PANGOLIN_DASHBOARD_DOMAIN
+export PANGOLIN_EMAIL
+
+echo -e "\n${INFO} Configuration Summary:${CL}"
+echo -e "  Base Domain: ${PANGOLIN_BASE_DOMAIN}"
+echo -e "  Dashboard Domain: ${PANGOLIN_DASHBOARD_DOMAIN}"
+echo -e "  Email: ${PANGOLIN_EMAIL}\n"
+
 function update_script() {
   header_info
   check_container_storage
@@ -51,7 +75,7 @@ description
 
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
-echo -e "${INFO}${YW} Complete setup using your configured domain:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}https://your-domain.com/auth/initial-setup${CL}"
-echo -e "${INFO}${YW} Credentials saved to:${CL}"
+echo -e "${INFO}${YW} Complete setup at:${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}https://${PANGOLIN_DASHBOARD_DOMAIN}/auth/initial-setup${CL}"
+echo -e "${INFO}${YW} Credentials and configuration saved to:${CL}"
 echo -e "${TAB}${GATEWAY}${BGN}~/pangolin.creds${CL}"

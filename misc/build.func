@@ -2514,7 +2514,13 @@ EOF'
   install_ssh_keys_into_ct
 
   # Run application installer
-  if ! lxc-attach -n "$CTID" -- bash -c "$(curl -fsSL https://raw.githubusercontent.com/brandonjjon/ProxmoxVED/pangolin/install/${var_install}.sh)"; then
+  # Pass Pangolin-specific environment variables if they exist
+  ENV_VARS=""
+  [[ -n "${PANGOLIN_BASE_DOMAIN}" ]] && ENV_VARS+="PANGOLIN_BASE_DOMAIN='${PANGOLIN_BASE_DOMAIN}' "
+  [[ -n "${PANGOLIN_DASHBOARD_DOMAIN}" ]] && ENV_VARS+="PANGOLIN_DASHBOARD_DOMAIN='${PANGOLIN_DASHBOARD_DOMAIN}' "
+  [[ -n "${PANGOLIN_EMAIL}" ]] && ENV_VARS+="PANGOLIN_EMAIL='${PANGOLIN_EMAIL}' "
+
+  if ! lxc-attach -n "$CTID" -- bash -c "${ENV_VARS}$(curl -fsSL https://raw.githubusercontent.com/brandonjjon/ProxmoxVED/pangolin/install/${var_install}.sh)"; then
     exit $?
   fi
 }
