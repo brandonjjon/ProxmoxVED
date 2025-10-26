@@ -291,9 +291,36 @@ msg_info "Starting Pangolin Stack"
 $STD docker compose up -d
 msg_ok "Started Pangolin Stack"
 
-msg_info "Waiting for Services to be Ready"
-sleep 10
-msg_ok "Services Ready"
+msg_info "Waiting for Pangolin to Generate Setup Token"
+SETUP_TOKEN=""
+for _ in {1..30}; do
+  SETUP_TOKEN=$(docker logs pangolin 2>&1 | grep -A1 "SETUP TOKEN GENERATED" | grep "Token:" | awk '{print $2}')
+  if [[ -n "$SETUP_TOKEN" ]]; then
+    break
+  fi
+  sleep 2
+done
+
+if [[ -z "$SETUP_TOKEN" ]]; then
+  msg_error "Failed to retrieve setup token from logs"
+  SETUP_TOKEN="Check Docker logs: docker logs pangolin"
+fi
+msg_ok "Setup Token Retrieved"
+
+# Append setup token to credentials file
+{
+  echo ""
+  echo "=========================================="
+  echo "INITIAL SETUP TOKEN (use this on first login):"
+  echo "  ${SETUP_TOKEN}"
+  echo "=========================================="
+  echo ""
+  echo "This token is required for the initial setup at:"
+  echo "  https://${DASHBOARD_DOMAIN}/auth/initial-setup"
+  echo ""
+  echo "NOTE: The 'Server Secret' above is for session encryption,"
+  echo "      NOT for the initial setup page."
+} >>~/pangolin.creds
 
 motd_ssh
 customize
