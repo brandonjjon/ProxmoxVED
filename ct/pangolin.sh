@@ -47,63 +47,28 @@ function update_script() {
 
 start
 
-# Collect Pangolin configuration before container creation
-msg_info "Pangolin Configuration Required"
-echo -e "${YW}Pangolin requires a domain name for proper operation.${CL}\n"
+# Collect Pangolin configuration using whiptail (like freepbx.sh does)
+PANGOLIN_BASE_DOMAIN=$(whiptail --title "Base Domain" --inputbox "Enter your root domain without subdomains.\n\nExample: example.com" 10 70 3>&1 1>&2 2>&3)
+exitstatus=$?
+if [ $exitstatus != 0 ] || [ -z "$PANGOLIN_BASE_DOMAIN" ]; then
+    echo -e "${RD}Base domain is required. Exiting.${CL}"
+    exit 1
+fi
 
-# Base Domain
-while true; do
-  echo -e "${BL}Enter your root domain without subdomains.${CL}"
-  echo -e "${DGN}Example: example.com${CL}"
-  read -r -p "Base Domain: " PANGOLIN_BASE_DOMAIN
-
-  if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
-    echo -e "${RD}Base domain is required. Please try again.${CL}\n"
-  else
-    break
-  fi
-done
-
-# Dashboard Domain
-echo -e "\n${BL}Enter your dashboard domain.${CL}"
-echo -e "${DGN}This is where you'll access the Pangolin web interface.${CL}"
-echo -e "${DGN}Press Enter to use: pangolin.${PANGOLIN_BASE_DOMAIN}${CL}"
-read -r -p "Dashboard Domain [pangolin.${PANGOLIN_BASE_DOMAIN}]: " PANGOLIN_DASHBOARD_DOMAIN
+PANGOLIN_DASHBOARD_DOMAIN=$(whiptail --title "Dashboard Domain" --inputbox "Enter your dashboard domain.\n\nThis is where you'll access the Pangolin web interface.\n\nDefault: pangolin.${PANGOLIN_BASE_DOMAIN}" 12 70 "pangolin.${PANGOLIN_BASE_DOMAIN}" 3>&1 1>&2 2>&3)
 PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-pangolin.${PANGOLIN_BASE_DOMAIN}}"
 
-# Email
-while true; do
-  echo -e "\n${BL}Enter your email address for Let's Encrypt SSL certificates and admin login.${CL}"
-  read -r -p "Email: " PANGOLIN_EMAIL
-
-  if [[ -z "$PANGOLIN_EMAIL" ]]; then
-    echo -e "${RD}Email is required. Please try again.${CL}\n"
-  else
-    break
-  fi
-done
-
-# Show configuration summary
-echo -e "\n${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}"
-echo -e "${BL}Configuration Summary:${CL}"
-echo -e "${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}"
-echo -e "  ${BL}Base Domain:${CL}      ${GN}${PANGOLIN_BASE_DOMAIN}${CL}"
-echo -e "  ${BL}Dashboard Domain:${CL} ${GN}${PANGOLIN_DASHBOARD_DOMAIN}${CL}"
-echo -e "  ${BL}Email:${CL}            ${GN}${PANGOLIN_EMAIL}${CL}"
-echo -e "${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}\n"
-
-read -r -p "Continue with these settings? [Y/n]: " CONFIRM
-if [[ "${CONFIRM,,}" =~ ^(n|no)$ ]]; then
-  msg_error "Installation cancelled by user."
-  exit 0
+PANGOLIN_EMAIL=$(whiptail --title "Let's Encrypt Email" --inputbox "Enter your email address for Let's Encrypt SSL certificates and admin login." 10 70 3>&1 1>&2 2>&3)
+exitstatus=$?
+if [ $exitstatus != 0 ] || [ -z "$PANGOLIN_EMAIL" ]; then
+    echo -e "${RD}Email is required. Exiting.${CL}"
+    exit 1
 fi
 
 # Export variables to pass to install script
 export PANGOLIN_BASE_DOMAIN
 export PANGOLIN_DASHBOARD_DOMAIN
 export PANGOLIN_EMAIL
-
-msg_ok "Configuration Collected"
 
 build_container
 description
