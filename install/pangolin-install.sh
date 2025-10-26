@@ -30,7 +30,7 @@ $STD bash <(curl -fsSL https://get.docker.com)
 $STD systemctl enable --now docker
 msg_ok "Installed Docker"
 
-msg_info "Setting up ${APP}"
+msg_info "Setting up Pangolin"
 INSTALL_DIR="/opt/pangolin"
 mkdir -p "$INSTALL_DIR"/{config/traefik,config/db,config/letsencrypt,config/logs}
 cd "$INSTALL_DIR" || exit
@@ -81,7 +81,7 @@ SERVER_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9@#%^&*()-_=+[]{}|;:,.
   echo ""
   echo "Complete setup at: https://${DASHBOARD_DOMAIN}/auth/initial-setup"
 } >>~/pangolin.creds
-msg_ok "Setup ${APP}"
+msg_ok "Setup Pangolin"
 
 msg_info "Creating Docker Compose Configuration"
 cat <<EOF >docker-compose.yml
@@ -316,9 +316,9 @@ chmod 600 config/letsencrypt/acme.json 2>/dev/null || touch config/letsencrypt/a
 chmod 600 config/config.yml
 msg_ok "Set Permissions"
 
-msg_info "Starting ${APP} Stack"
+msg_info "Starting Pangolin Stack"
 $STD docker compose up -d
-msg_ok "Started ${APP} Stack"
+msg_ok "Started Pangolin Stack"
 
 msg_info "Waiting for Services to be Ready"
 sleep 10
