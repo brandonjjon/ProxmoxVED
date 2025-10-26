@@ -47,47 +47,56 @@ function update_script() {
 
 start
 
-# Collect Pangolin configuration before container creation using whiptail
-msg_info "Pangolin Configuration"
+# Collect Pangolin configuration before container creation
+msg_info "Pangolin Configuration Required"
+echo -e "${YW}Pangolin requires a domain name for proper operation.${CL}\n"
 
-PANGOLIN_BASE_DOMAIN=$(whiptail --inputbox \
-  "Enter your root domain without subdomains.\n\nExample: example.com" \
-  10 70 \
-  --title "Base Domain" 3>&1 1>&2 2>&3)
+# Base Domain
+while true; do
+  echo -e "${BL}Enter your root domain without subdomains.${CL}"
+  echo -e "${DGN}Example: example.com${CL}"
+  read -r -p "Base Domain: " PANGOLIN_BASE_DOMAIN
 
-if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
-  msg_error "Base domain is required. Exiting."
-  exit 1
-fi
+  if [[ -z "$PANGOLIN_BASE_DOMAIN" ]]; then
+    echo -e "${RD}Base domain is required. Please try again.${CL}\n"
+  else
+    break
+  fi
+done
 
-PANGOLIN_DASHBOARD_DOMAIN=$(whiptail --inputbox \
-  "Enter your dashboard domain.\n\nThis is where you'll access the Pangolin web interface.\n\nPress Enter to use: pangolin.${PANGOLIN_BASE_DOMAIN}" \
-  12 70 \
-  "pangolin.${PANGOLIN_BASE_DOMAIN}" \
-  --title "Dashboard Domain" 3>&1 1>&2 2>&3)
-
+# Dashboard Domain
+echo -e "\n${BL}Enter your dashboard domain.${CL}"
+echo -e "${DGN}This is where you'll access the Pangolin web interface.${CL}"
+echo -e "${DGN}Press Enter to use: pangolin.${PANGOLIN_BASE_DOMAIN}${CL}"
+read -r -p "Dashboard Domain [pangolin.${PANGOLIN_BASE_DOMAIN}]: " PANGOLIN_DASHBOARD_DOMAIN
 PANGOLIN_DASHBOARD_DOMAIN="${PANGOLIN_DASHBOARD_DOMAIN:-pangolin.${PANGOLIN_BASE_DOMAIN}}"
 
-PANGOLIN_EMAIL=$(whiptail --inputbox \
-  "Enter your email address for Let's Encrypt SSL certificates and admin login." \
-  10 70 \
-  --title "Let's Encrypt Email" 3>&1 1>&2 2>&3)
+# Email
+while true; do
+  echo -e "\n${BL}Enter your email address for Let's Encrypt SSL certificates and admin login.${CL}"
+  read -r -p "Email: " PANGOLIN_EMAIL
 
-if [[ -z "$PANGOLIN_EMAIL" ]]; then
-  msg_error "Email is required. Exiting."
-  exit 1
-fi
+  if [[ -z "$PANGOLIN_EMAIL" ]]; then
+    echo -e "${RD}Email is required. Please try again.${CL}\n"
+  else
+    break
+  fi
+done
 
 # Show configuration summary
-whiptail --title "Configuration Summary" --msgbox \
-"Pangolin will be configured with:
+echo -e "\n${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}"
+echo -e "${BL}Configuration Summary:${CL}"
+echo -e "${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}"
+echo -e "  ${BL}Base Domain:${CL}      ${GN}${PANGOLIN_BASE_DOMAIN}${CL}"
+echo -e "  ${BL}Dashboard Domain:${CL} ${GN}${PANGOLIN_DASHBOARD_DOMAIN}${CL}"
+echo -e "  ${BL}Email:${CL}            ${GN}${PANGOLIN_EMAIL}${CL}"
+echo -e "${GN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${CL}\n"
 
-Base Domain: ${PANGOLIN_BASE_DOMAIN}
-Dashboard Domain: ${PANGOLIN_DASHBOARD_DOMAIN}
-Email: ${PANGOLIN_EMAIL}
-
-Press OK to continue with installation." \
-14 70
+read -r -p "Continue with these settings? [Y/n]: " CONFIRM
+if [[ "${CONFIRM,,}" =~ ^(n|no)$ ]]; then
+  msg_error "Installation cancelled by user."
+  exit 0
+fi
 
 # Export variables to pass to install script
 export PANGOLIN_BASE_DOMAIN
