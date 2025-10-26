@@ -21,8 +21,7 @@ $STD apt-get install -y \
   mc \
   ca-certificates \
   gnupg \
-  openssl \
-  whiptail
+  openssl
 msg_ok "Installed Dependencies"
 
 msg_info "Installing Docker"
@@ -35,51 +34,27 @@ INSTALL_DIR="/opt/pangolin"
 mkdir -p "$INSTALL_DIR"/{config/traefik,config/db,config/letsencrypt,config/logs}
 cd "$INSTALL_DIR" || exit
 
-BASE_DOMAIN=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter your base domain (e.g., example.com)" 8 78 --title "Base Domain" 3>&1 1>&2 2>&3)
-exitstatus=$?
-if [ $exitstatus != 0 ]; then
-  msg_error "Domain is required for Pangolin installation"
-  exit 1
-fi
-
-DASHBOARD_SUBDOMAIN=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter dashboard subdomain (default: pangolin)" 8 78 "pangolin" --title "Dashboard Subdomain" 3>&1 1>&2 2>&3)
-DASHBOARD_SUBDOMAIN=${DASHBOARD_SUBDOMAIN:-pangolin}
-DASHBOARD_DOMAIN="${DASHBOARD_SUBDOMAIN}.${BASE_DOMAIN}"
-
-LETSENCRYPT_EMAIL=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter email address for Let's Encrypt SSL" 8 78 --title "Email Address" 3>&1 1>&2 2>&3)
-exitstatus=$?
-if [ $exitstatus != 0 ]; then
-  msg_error "Email is required for Pangolin installation"
-  exit 1
-fi
-
-if whiptail --backtitle "Pangolin Setup" --title "SMTP Email" --yesno "Enable SMTP email functionality?" 8 78; then
-  ENABLE_EMAIL="y"
-  SMTP_HOST=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter SMTP host" 8 78 --title "SMTP Host" 3>&1 1>&2 2>&3)
-  SMTP_PORT=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter SMTP port" 8 78 "587" --title "SMTP Port" 3>&1 1>&2 2>&3)
-  SMTP_PORT=${SMTP_PORT:-587}
-  SMTP_USER=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter SMTP username" 8 78 --title "SMTP Username" 3>&1 1>&2 2>&3)
-  SMTP_PASS=$(whiptail --backtitle "Pangolin Setup" --passwordbox "Enter SMTP password" 8 78 --title "SMTP Password" 3>&1 1>&2 2>&3)
-  if whiptail --backtitle "Pangolin Setup" --title "SMTP Secure" --yesno "Use secure connection (SSL/TLS)?" 8 78; then
-    SMTP_SECURE="y"
-  else
-    SMTP_SECURE="n"
-  fi
-  NO_REPLY_EMAIL=$(whiptail --backtitle "Pangolin Setup" --inputbox "Enter no-reply email address" 8 78 "$SMTP_USER" --title "No-Reply Email" 3>&1 1>&2 2>&3)
-  NO_REPLY_EMAIL=${NO_REPLY_EMAIL:-$SMTP_USER}
-else
-  ENABLE_EMAIL="n"
-fi
-
+# Use placeholder values - user must configure via web UI or edit config.yml
+BASE_DOMAIN="localhost"
+DASHBOARD_DOMAIN="localhost"
+LETSENCRYPT_EMAIL="admin@localhost"
 SERVER_SECRET=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9@#%^&*()-_=+[]{}|;:,.<>?' | head -c48)
 
 {
-  echo "Pangolin Credentials"
-  echo "Dashboard URL: https://${DASHBOARD_DOMAIN}"
-  echo "Email: ${LETSENCRYPT_EMAIL}"
-  echo "Server Secret: ${SERVER_SECRET}"
+  echo "Pangolin Installation Complete"
   echo ""
-  echo "Complete setup at: https://${DASHBOARD_DOMAIN}/auth/initial-setup"
+  echo "IMPORTANT: You must configure Pangolin before first use!"
+  echo ""
+  echo "Configuration file: /opt/pangolin/config/config.yml"
+  echo "Edit the config file and update:"
+  echo "  - app.dashboard_url (your actual domain)"
+  echo "  - domains.domain1.base_domain (your actual domain)"
+  echo "  - email settings (if using SMTP)"
+  echo ""
+  echo "After editing config, restart services:"
+  echo "  cd /opt/pangolin && docker compose restart"
+  echo ""
+  echo "Server Secret (save this): ${SERVER_SECRET}"
 } >>~/pangolin.creds
 msg_ok "Setup Pangolin"
 
@@ -186,23 +161,6 @@ flags:
   disable_user_create_org: true
   allow_raw_resources: true
 EOF
-
-if [[ "$ENABLE_EMAIL" =~ ^[Yy]$ ]]; then
-  SMTP_SECURE_VALUE="false"
-  [[ "$SMTP_SECURE" =~ ^[Yy]$ ]] && SMTP_SECURE_VALUE="true"
-
-  cat <<EOF >>config/config.yml
-
-email:
-  smtp_host: "${SMTP_HOST}"
-  smtp_port: ${SMTP_PORT}
-  smtp_user: "${SMTP_USER}"
-  smtp_pass: "${SMTP_PASS}"
-  smtp_secure: ${SMTP_SECURE_VALUE}
-  no_reply: "${NO_REPLY_EMAIL}"
-  smtp_tls_reject_unauthorized: true
-EOF
-fi
 msg_ok "Created Pangolin Configuration"
 
 msg_info "Creating Traefik Static Configuration"
