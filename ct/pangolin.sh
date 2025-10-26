@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-REPO_URL="${REPO_URL:-https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main}"
+REPO_URL="${REPO_URL:-https://raw.githubusercontent.com/brandonjjon/ProxmoxVED/pangolin}"
 # shellcheck disable=SC1090
 source <(curl -fsSL "${REPO_URL}/misc/build.func")
 # Copyright (c) 2021-2025 community-scripts ORG
